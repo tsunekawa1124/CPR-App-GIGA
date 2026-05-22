@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, Loader2, PlayCircle, ChevronLeft } from 'lucide-react';
+import { Camera, Video, FolderOpen, Loader2, PlayCircle, ChevronLeft } from 'lucide-react';
 import { globalPoseLandmarker, modelReady } from '../utils/mediapipe';
 
 // 対象校リスト
@@ -16,7 +16,8 @@ const JUNIOR_SCHOOLS = [
 export default function VideoEvaluation() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null);       // 既存動画選択用
+  const captureInputRef = useRef(null);    // その場で撮影用
 
   const [school, setSchool] = useState('');
   const [className, setClassName] = useState('');
@@ -201,18 +202,37 @@ export default function VideoEvaluation() {
           )}
         </div>
 
-        <button
-          className="btn-file"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Camera size={20} />
-          動画を選択する
-        </button>
+        <div className="file-buttons">
+          <button
+            className="btn-file"
+            onClick={() => captureInputRef.current?.click()}
+          >
+            <Video size={20} />
+            その場で撮影する
+          </button>
+          <button
+            className="btn-file"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <FolderOpen size={20} />
+            撮影済み動画を選ぶ
+          </button>
+        </div>
+
+        {/* その場で撮影 */}
+        <input
+          ref={captureInputRef}
+          type="file"
+          accept="video/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+        {/* 既存動画を選択 */}
         <input
           ref={fileInputRef}
           type="file"
           accept="video/*"
-          capture="environment"
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />

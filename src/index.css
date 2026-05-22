@@ -230,21 +230,28 @@ body {
   font-size: 0.95rem;
 }
 
+.file-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .btn-file {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  padding: 12px;
+  padding: 12px 8px;
   border: 2px dashed var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
+  text-align: center;
 }
 .btn-file:hover { border-color: var(--primary); color: var(--primary); }
 
