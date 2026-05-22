@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Camera, Loader2, PlayCircle, ChevronLeft } from 'lucide-react';
-import { globalPoseLandmarker, modelReady } from '../App';
+import { globalPoseLandmarker, modelReady } from '../utils/mediapipe';
 
 // 対象校リスト
 const ELEMENTARY_SCHOOLS = [
