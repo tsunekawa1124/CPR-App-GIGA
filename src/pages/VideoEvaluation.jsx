@@ -163,7 +163,7 @@ export default function VideoEvaluation() {
       <div className="form-group">
         <label>学校を選択</label>
         <select value={school} onChange={(e) => setSchool(e.target.value)}>
-          <option value="">-- 選択してください --</option>
+          <option value="">学校を選択</option>
           <optgroup label="小学校">
             {ELEMENTARY_SCHOOLS.map((s) => <option key={s} value={s}>{s}</option>)}
           </optgroup>
@@ -177,7 +177,11 @@ export default function VideoEvaluation() {
         <label>クラスを入力</label>
         <input
           type="text"
-          placeholder="例: 5年1組 / 2年3組"
+          placeholder={
+            JUNIOR_SCHOOLS.includes(school)
+              ? '例: 2年1組'
+              : '例: 5年1組'
+          }
           value={className}
           onChange={(e) => setClassName(e.target.value)}
         />
