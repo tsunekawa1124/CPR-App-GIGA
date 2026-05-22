@@ -1,0 +1,149 @@
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
+import { RotateCcw, Home, AlertTriangle } from 'lucide-react';
+import { calcScore } from '../utils/scoring';
+import { postScore } from '../utils/gas';
+
+const RANK_COLOR = { S: '#f39c12', A: '#27ae60', B: '#2980b9', C: '#7f8c8d' };
+
+export default function Result() {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const sentRef = useRef(false);
+
+  const { bpmValues = [], tiltValues = [], compressions = 0,
+          isAborted = false, school = '', className = '', schoolType = 'elementary' } = state ?? {};
+
+  const result = isAborted ? null : calcScore(bpmValues, tiltValues);
+
+  // GAS 送信（1回のみ）
+  useEffect(() => {
+    if (!result || sentRef.current) return;
+    sentRef.current = true;
+    postScore({
+      score: result.score,
+      medianBpm: result.medianBpm,
+      medianTilt: result.medianTilt,
+      compressions,
+      bpmOutOfRange: result.bpmOutOfRange,
+      badFrameRate: result.badFrameRate,
+      school,
+      className,
+      schoolType,
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
+  // エキスパート（S ランク）なら紙吹雪
+  useEffect(() => {
+    if (result?.rank.tier === 'S') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+    }
+  }, [result]);
+
+  // 中断エラー UI
+  if (isAborted || !state) {
+    return (
+      <div className="page result-page center">
+        <AlertTriangle size={56} color="#e74c3c" />
+        <h2 className="error-title">計測を中断しました</h2>
+        <p className="error-msg">動画の読み込みに失敗したか、解析が正常に完了しませんでした。</p>
+        <button className="btn btn-primary" onClick={() => navigate('/evaluate')}>
+          <RotateCcw size={20} /> もう一度試す
+        </button>
+        <button className="btn btn-outline" onClick={() => navigate('/')}>
+          <Home size={20} /> ホームへ
+        </button>
+      </div>
+    );
+  }
+
+  const { score, rank, advice, medianBpm, medianTilt,
+          bpmDeduction, tiltDeduction, bpmOutOfRange, badFrameRate } = result;
+
+  return (
+    <div className="page result-page">
+      {/* スコア表示 */}
+      <motion.div
+        className="score-card"
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+      >
+        <span className="rank-label" style={{ color: RANK_COLOR[rank.tier] }}>
+          {rank.label}
+        </span>
+        <motion.span
+          className="score-number"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {score}<span className="score-unit">点</span>
+        </motion.span>
+        <span className="rank-name" style={{ color: RANK_COLOR[rank.tier] }}>
+          {rank.name}
+        </span>
+      </motion.div>
+
+      {/* 内訳 */}
+      <motion.div
+        className="breakdown"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <div className={`breakdown-item ${bpmDeduction === 0 ? 'ok' : 'ng'}`}>
+          <span className="breakdown-label">リズム（BPM）</span>
+          <span className="breakdown-value">{medianBpm} 回/分</span>
+          <span className="breakdown-detail">
+            {bpmDeduction === 0
+              ? '✓ 合格'
+              : `範囲外 ${bpmOutOfRange}回 → −${bpmDeduction}点`}
+          </span>
+        </div>
+        <div className={`breakdown-item ${tiltDeduction === 0 ? 'ok' : 'ng'}`}>
+          <span className="breakdown-label">姿勢（傾き）</span>
+          <span className="breakdown-value">{medianTilt}°</span>
+          <span className="breakdown-detail">
+            {tiltDeduction === 0
+              ? '✓ 合格'
+              : `不良フレーム ${Math.round(badFrameRate * 100)}% → −${tiltDeduction}点`}
+          </span>
+        </div>
+        <div className="breakdown-item neutral">
+          <span className="breakdown-label">圧迫回数</span>
+          <span className="breakdown-value">{compressions} 回</span>
+        </div>
+      </motion.div>
+
+      {/* アドバイス（仕様書§4.3 準拠） */}
+      {advice.length > 0 && (
+        <motion.div
+          className="advice-box"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <p className="advice-title">上達のヒント</p>
+          {advice.map((a, i) => <p key={i} className="advice-text">• {a}</p>)}
+        </motion.div>
+      )}
+
+      {/* アクション */}
+      <div className="result-actions">
+        <button className="btn btn-primary" onClick={() => navigate('/evaluate')}>
+          <RotateCcw size={20} /> もう一度評価する
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate('/ranking')}>
+          ランキングを見る
+        </button>
+        <button className="btn btn-outline" onClick={() => navigate('/')}>
+          <Home size={20} /> ホームへ
+        </button>
+      </div>
+    </div>
+  );
+}
