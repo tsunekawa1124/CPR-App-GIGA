@@ -21,6 +21,7 @@ export default function VideoEvaluation() {
 
   const [school, setSchool] = useState('');
   const [className, setClassName] = useState('');
+  const [studentNum, setStudentNum] = useState('');
   const [videoReady, setVideoReady] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(modelReady);
@@ -47,6 +48,7 @@ export default function VideoEvaluation() {
     if (!modelLoaded || !videoReady || isAnalyzing) return;
     if (!school) { alert('学校を選択してください'); return; }
     if (!className.trim()) { alert('クラスを入力してください'); return; }
+    if (!studentNum.trim()) { alert('出席番号を入力してください'); return; }
 
     setIsAnalyzing(true);
     const video = videoRef.current;
@@ -139,7 +141,7 @@ export default function VideoEvaluation() {
     video.pause();
     const schoolType = JUNIOR_SCHOOLS.includes(school) ? 'junior' : 'elementary';
     navigate('/result', {
-      state: { bpmValues, tiltValues, compressions, isAborted, school, className, schoolType },
+      state: { bpmValues, tiltValues, compressions, isAborted, school, className, studentNum, schoolType },
     });
   }
 
@@ -185,6 +187,18 @@ export default function VideoEvaluation() {
           }
           value={className}
           onChange={(e) => setClassName(e.target.value)}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>出席番号</label>
+        <input
+          type="number"
+          min="1"
+          max="40"
+          placeholder="例: 12"
+          value={studentNum}
+          onChange={(e) => setStudentNum(e.target.value)}
         />
       </div>
 

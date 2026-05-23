@@ -14,7 +14,8 @@ export default function Result() {
   const sentRef = useRef(false);
 
   const { bpmValues = [], tiltValues = [], compressions = 0,
-          isAborted = false, school = '', className = '', schoolType = 'elementary' } = state ?? {};
+          isAborted = false, school = '', className = '', studentNum = '',
+          schoolType = 'elementary' } = state ?? {};
 
   const result = isAborted ? null : calcScore(bpmValues, tiltValues);
 
@@ -31,6 +32,7 @@ export default function Result() {
       badFrameRate: result.badFrameRate,
       school,
       className,
+      studentNum,
       schoolType,
       timestamp: new Date().toISOString(),
     });
