@@ -15,15 +15,24 @@ function calcBpmDeduction(bpmValues) {
 /**
  * 傾き減点（最大 50点）
  * 20° 超のフレーム割合に応じた段階減点
+ *
+ * 0%        → 0点
+ * 1〜 5%   → −10点
+ * 6〜15%   → −20点
+ * 16〜30%  → −30点
+ * 31〜50%  → −40点
+ * 51%以上  → −50点
  */
 function calcTiltDeduction(tiltValues) {
   if (!tiltValues.length) return 0;
   const badCount = tiltValues.filter((t) => t > 20).length;
   const rate = badCount / tiltValues.length;
 
-  if (rate <= 0.10) return 0;
-  if (rate <= 0.25) return 15;
-  if (rate <= 0.50) return 30;
+  if (rate === 0)    return 0;
+  if (rate <= 0.05)  return 10;
+  if (rate <= 0.15)  return 20;
+  if (rate <= 0.30)  return 30;
+  if (rate <= 0.50)  return 40;
   return 50;
 }
 
